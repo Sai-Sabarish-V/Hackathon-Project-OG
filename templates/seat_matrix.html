@@ -222,8 +222,9 @@
         .matrix-grid {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
-            gap: 8px;
+            gap: 12px;
             margin: 30px 0;
+            align-items: center;
         }
 
         .seat {
@@ -231,15 +232,42 @@
             background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
             border-radius: 8px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
             border: 2px solid transparent;
             position: relative;
             user-select: none;
             font-size: 0.9rem;
+            width: 75%;
+            height: 75%;
+            margin: 0 auto;
+            min-width: 60px;
+            min-height: 60px;
+        }
+
+        .zone-header {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #00d4ff;
+            margin: 25px 0 15px 0;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 153, 204, 0.1) 100%);
+            border-radius: 15px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
+        }
+
+        .zone-divider {
+            grid-column: 1 / -1;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+            margin: 10px 0;
         }
 
         .seat-number {
@@ -251,10 +279,9 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
-        .desk-icon {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.9);
-        }
+
+
+
 
         .seat:hover {
             transform: scale(1.1);
@@ -412,9 +439,9 @@
                 <div class="floor-title">Select a Floor</div>
                 <div class="floor-buttons">
                     <button class="floor-btn" data-floor="ground">Ground Floor (50 seats)</button>
-                    <button class="floor-btn" data-floor="floor1">Floor 1 (100 seats)</button>
-                    <button class="floor-btn" data-floor="floor2">Floor 2 (100 seats)</button>
-                    <button class="floor-btn" data-floor="floor3">Floor 3 (100 seats)</button>
+                    <button class="floor-btn" data-floor="floor1">Floor 1 (80 seats - Zones A/B/C)</button>
+                    <button class="floor-btn" data-floor="floor2">Floor 2 (80 seats - Zones A/B/C)</button>
+                    <button class="floor-btn" data-floor="floor3">Floor 3 (80 seats - Zones A/B/C)</button>
                 </div>
             </div>
             
@@ -477,7 +504,7 @@
                         <span>My Reservation</span>
                     </div>
                     <div class="legend-item">
-                        <i class="fas fa-plug" style="color: #feca57;"></i>
+                        <div class="legend-color" style="background: #feca57;"></div>
                         <span>Charging Available</span>
                     </div>
                 </div>
@@ -495,7 +522,45 @@
         let currentFloor = null;
         let userReservation = null;
         let reservations = {{ reservations | tojson | safe }};
-        let floorConfig = {{ floor_config | tojson | safe }};
+        // Floor configuration with zones
+        let floorConfig = {
+            ground: { 
+                name: 'Ground Floor',
+                total_seats: 50, 
+                charging_seats: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59],
+                zones: []
+            },
+            floor1: { 
+                name: 'Floor 1',
+                total_seats: 80, 
+                charging_seats: [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75],
+                zones: [
+                    { name: 'Zone A', seats: 20, start: 1, end: 20 },
+                    { name: 'Zone B', seats: 40, start: 21, end: 60 },
+                    { name: 'Zone C', seats: 20, start: 61, end: 80 }
+                ]
+            },
+            floor2: { 
+                name: 'Floor 2',
+                total_seats: 80, 
+                charging_seats: [2, 7, 12, 17, 22, 27, 32, 37, 42, 47, 52, 57, 62, 67, 72, 77],
+                zones: [
+                    { name: 'Zone A', seats: 20, start: 1, end: 20 },
+                    { name: 'Zone B', seats: 40, start: 21, end: 60 },
+                    { name: 'Zone C', seats: 20, start: 61, end: 80 }
+                ]
+            },
+            floor3: { 
+                name: 'Floor 3',
+                total_seats: 80, 
+                charging_seats: [3, 8, 13, 18, 23, 28, 33, 38, 43, 48, 53, 58, 63, 68, 73, 78],
+                zones: [
+                    { name: 'Zone A', seats: 20, start: 1, end: 20 },
+                    { name: 'Zone B', seats: 40, start: 21, end: 60 },
+                    { name: 'Zone C', seats: 20, start: 61, end: 80 }
+                ]
+            }
+        };
 
         // Floor selection
         document.querySelectorAll('.floor-btn').forEach(btn => {
@@ -534,73 +599,156 @@
             
             const totalSeats = floorConfig[floor].total_seats;
             const chargingSeats = floorConfig[floor].charging_seats;
+            const zones = floorConfig[floor].zones;
             
-            for (let i = 1; i <= totalSeats; i++) {
-                const seat = document.createElement('div');
-                seat.className = 'seat';
-                seat.dataset.seatNumber = i;
-                seat.dataset.floor = floor;
-                
-                // Add desk icon
-                const deskIcon = document.createElement('i');
-                deskIcon.className = 'fas fa-desk desk-icon';
-                seat.appendChild(deskIcon);
-                
-                // Add seat number in bottom right
-                const seatNumber = document.createElement('div');
-                seatNumber.className = 'seat-number';
-                seatNumber.textContent = i;
-                seat.appendChild(seatNumber);
-                
-                // Check if seat has charging
-                if (chargingSeats.includes(i)) {
-                    const chargingIcon = document.createElement('i');
-                    chargingIcon.className = 'fas fa-plug charging-icon';
-                    seat.appendChild(chargingIcon);
-                }
-                
-                // Check seat status
-                const seatId = `${floor}_${i}`;
-                if (reservations[seatId]) {
-                    seat.classList.add('reserved');
-                    addTimerToSeat(seat, reservations[seatId].expires_at);
+            if (zones && zones.length > 0) {
+                // Generate seats organized by zones
+                zones.forEach(zone => {
+                    // Add zone header
+                    const zoneHeader = document.createElement('div');
+                    zoneHeader.className = 'zone-header';
+                    zoneHeader.textContent = zone.name;
+                    seatGrid.appendChild(zoneHeader);
                     
-                    // Check if it's user's reservation
-                    if (reservations[seatId].user_name === currentUser) {
-                        seat.classList.add('my-reservation');
-                    }
-                } else {
-                    seat.classList.add('available');
-                }
-                
-                // Add event listeners
-                seat.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const seatNumber = this.dataset.seatNumber;
-                    const status = this.classList.contains('occupied') ? 'Occupied' : 
-                                 this.classList.contains('reserved') ? 'Reserved' : 'Available';
-                    
-                    if (this.classList.contains('reserved') && reservations[seatId]) {
-                        const reservation = reservations[seatId];
-                        const expiresAt = new Date(reservation.expires_at);
-                        const timeLeft = Math.max(0, Math.floor((expiresAt - new Date()) / 1000 / 60));
-                        alert(`Seat ${seatNumber} is reserved by ${reservation.user_name}\nExpires in: ${timeLeft} minutes`);
-                    } else {
-                        alert(`Seat ${seatNumber} is ${status}`);
-                    }
-                });
+                    // Generate seats for this zone
+                    for (let i = zone.start; i <= zone.end; i++) {
+                        const seat = document.createElement('div');
+                        seat.className = 'seat';
+                        seat.dataset.seatNumber = i;
+                        seat.dataset.floor = floor;
+                        
+                        // Add seat number in bottom right
+                        const seatNumber = document.createElement('div');
+                        seatNumber.className = 'seat-number';
+                        seatNumber.textContent = i;
+                        seat.appendChild(seatNumber);
+                        
+                        // Check if seat has charging
+                        if (chargingSeats.includes(i)) {
+                            const chargingIcon = document.createElement('i');
+                            chargingIcon.className = 'fas fa-plug charging-icon';
+                            seat.appendChild(chargingIcon);
+                        }
+                        
+                        // Check seat status
+                        const seatId = `${floor}_${i}`;
+                        if (reservations[seatId]) {
+                            seat.classList.add('reserved');
+                            addTimerToSeat(seat, reservations[seatId].expires_at);
+                            
+                            // Check if it's user's reservation
+                            if (reservations[seatId].user_name === currentUser) {
+                                seat.classList.add('my-reservation');
+                            }
+                        } else {
+                            seat.classList.add('available');
+                        }
+                        
+                        // Add event listeners
+                        seat.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const seatNumber = this.dataset.seatNumber;
+                            const status = this.classList.contains('occupied') ? 'Occupied' : 
+                                         this.classList.contains('reserved') ? 'Reserved' : 'Available';
+                            
+                            const currentSeatId = `${floor}_${seatNumber}`;
+                            if (this.classList.contains('reserved') && reservations[currentSeatId]) {
+                                const reservation = reservations[currentSeatId];
+                                const expiresAt = new Date(reservation.expires_at);
+                                const timeLeft = Math.max(0, Math.floor((expiresAt - new Date()) / 1000 / 60));
+                                alert(`Seat ${seatNumber} is reserved by ${reservation.user_name}\nExpires in: ${timeLeft} minutes`);
+                            } else {
+                                alert(`Seat ${seatNumber} is ${status}`);
+                            }
+                        });
 
-                seat.addEventListener('contextmenu', function(e) {
-                    e.preventDefault();
-                    if (this.classList.contains('available')) {
-                        reserveSeat(this.dataset.seatNumber, currentFloor, currentUser);
-                    } else if (this.classList.contains('reserved') && reservations[seatId] && 
-                              reservations[seatId].user_name === currentUser) {
-                        cancelReservation(seatId);
+                        seat.addEventListener('contextmenu', function(e) {
+                            e.preventDefault();
+                            const currentSeatId = `${floor}_${this.dataset.seatNumber}`;
+                            if (this.classList.contains('available')) {
+                                reserveSeat(this.dataset.seatNumber, currentFloor, currentUser);
+                            } else if (this.classList.contains('reserved') && reservations[currentSeatId] && 
+                                      reservations[currentSeatId].user_name === currentUser) {
+                                cancelReservation(currentSeatId);
+                            }
+                        });
+                        
+                        seatGrid.appendChild(seat);
+                    }
+                    
+                    // Add zone divider after each zone (except the last one)
+                    if (zone !== zones[zones.length - 1]) {
+                        const zoneDivider = document.createElement('div');
+                        zoneDivider.className = 'zone-divider';
+                        seatGrid.appendChild(zoneDivider);
                     }
                 });
-                
-                seatGrid.appendChild(seat);
+            } else {
+                // For ground floor without zones, generate all seats normally
+                for (let i = 1; i <= totalSeats; i++) {
+                    const seat = document.createElement('div');
+                    seat.className = 'seat';
+                    seat.dataset.seatNumber = i;
+                    seat.dataset.floor = floor;
+                    
+                    // Add seat number in bottom right
+                    const seatNumber = document.createElement('div');
+                    seatNumber.className = 'seat-number';
+                    seatNumber.textContent = i;
+                    seat.appendChild(seatNumber);
+                    
+                    // Check if seat has charging
+                    if (chargingSeats.includes(i)) {
+                        const chargingIcon = document.createElement('i');
+                        chargingIcon.className = 'fas fa-plug charging-icon';
+                        seat.appendChild(chargingIcon);
+                    }
+                    
+                    // Check seat status
+                    const seatId = `${floor}_${i}`;
+                    if (reservations[seatId]) {
+                        seat.classList.add('reserved');
+                        addTimerToSeat(seat, reservations[seatId].expires_at);
+                        
+                        // Check if it's user's reservation
+                        if (reservations[seatId].user_name === currentUser) {
+                            seat.classList.add('my-reservation');
+                        }
+                    } else {
+                        seat.classList.add('available');
+                    }
+                    
+                    // Add event listeners
+                    seat.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const seatNumber = this.dataset.seatNumber;
+                        const status = this.classList.contains('occupied') ? 'Occupied' : 
+                                     this.classList.contains('reserved') ? 'Reserved' : 'Available';
+                        
+                        const currentSeatId = `${floor}_${seatNumber}`;
+                        if (this.classList.contains('reserved') && reservations[currentSeatId]) {
+                            const reservation = reservations[currentSeatId];
+                            const expiresAt = new Date(reservation.expires_at);
+                            const timeLeft = Math.max(0, Math.floor((expiresAt - new Date()) / 1000 / 60));
+                            alert(`Seat ${seatNumber} is reserved by ${reservation.user_name}\nExpires in: ${timeLeft} minutes`);
+                        } else {
+                            alert(`Seat ${seatNumber} is ${status}`);
+                        }
+                    });
+
+                    seat.addEventListener('contextmenu', function(e) {
+                        e.preventDefault();
+                        const currentSeatId = `${floor}_${this.dataset.seatNumber}`;
+                        if (this.classList.contains('available')) {
+                            reserveSeat(this.dataset.seatNumber, currentFloor, currentUser);
+                        } else if (this.classList.contains('reserved') && reservations[currentSeatId] && 
+                                  reservations[currentSeatId].user_name === currentUser) {
+                            cancelReservation(currentSeatId);
+                        }
+                    });
+                    
+                    seatGrid.appendChild(seat);
+                }
             }
         }
 
@@ -681,12 +829,7 @@
                 seat.className = 'seat';
                 seat.classList.add(status);
                 
-                // Ensure desk icon and seat number are preserved
-                if (!seat.querySelector('.desk-icon')) {
-                    const deskIcon = document.createElement('i');
-                    deskIcon.className = 'fas fa-desk desk-icon';
-                    seat.appendChild(deskIcon);
-                }
+                // Ensure seat number is preserved
                 
                 if (!seat.querySelector('.seat-number')) {
                     const seatNumber = document.createElement('div');

@@ -14,22 +14,38 @@ FLOOR_CONFIG = {
     'ground': {
         'name': 'Ground Floor',
         'total_seats': 50,
-        'charging_seats': list(random.sample(range(1, 51), 25))  # 25 seats with charging
+        'charging_seats': list(random.sample(range(1, 51), 25)),  # 25 seats with charging
+        'zones': []
     },
     'floor1': {
         'name': 'Floor 1',
-        'total_seats': 100,
-        'charging_seats': list(random.sample(range(1, 101), 50))  # 50 seats with charging
+        'total_seats': 80,
+        'charging_seats': list(random.sample(range(1, 101), 40)),  # 40 seats with charging
+        'zones': [
+            {'name': 'Zone A', 'seats': 20, 'start': 1, 'end': 20},
+            {'name': 'Zone B', 'seats': 40, 'start': 21, 'end': 60},
+            {'name': 'Zone C', 'seats': 20, 'start': 61, 'end': 80}
+        ]
     },
     'floor2': {
         'name': 'Floor 2',
-        'total_seats': 100,
-        'charging_seats': list(random.sample(range(1, 101), 50))  # 50 seats with charging
+        'total_seats': 80,
+        'charging_seats': list(random.sample(range(1, 101), 40)),  # 40 seats with charging
+        'zones': [
+            {'name': 'Zone A', 'seats': 20, 'start': 1, 'end': 20},
+            {'name': 'Zone B', 'seats': 40, 'start': 21, 'end': 60},
+            {'name': 'Zone C', 'seats': 20, 'start': 61, 'end': 80}
+        ]
     },
     'floor3': {
         'name': 'Floor 3',
-        'total_seats': 100,
-        'charging_seats': list(random.sample(range(1, 101), 50))  # 50 seats with charging
+        'total_seats': 80,
+        'charging_seats': list(random.sample(range(1, 101), 40)),  # 40 seats with charging
+        'zones': [
+            {'name': 'Zone A', 'seats': 20, 'start': 1, 'end': 20},
+            {'name': 'Zone B', 'seats': 40, 'start': 21, 'end': 60},
+            {'name': 'Zone C', 'seats': 20, 'start': 61, 'end': 80}
+        ]
     }
 }
 
