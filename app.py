@@ -106,7 +106,7 @@ def reserve_seat():
         if existing_reservation:
             return jsonify({
                 'success': False, 
-                'message': 'You already have a reservation. Please cancel your existing reservation first.',
+                'message': 'Please cancel your current reservation first.',
                 'existing_reservation': existing_reservation
             })
         
