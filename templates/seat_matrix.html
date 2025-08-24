@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seat Matrix - Library Manager</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00d4ff, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 120px;
+            padding: 40px 0;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            background: linear-gradient(45deg, #00d4ff, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Floor Selection */
+        .floor-selection {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .floor-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #00d4ff;
+        }
+
+        .floor-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .floor-btn {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+
+        .floor-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .floor-btn.active {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        /* User Info */
+        .user-info {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .user-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+
+        .user-instructions {
+            color: #b0b0b0;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .user-reservation {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .reservation-info {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .cancel-reservation-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .cancel-reservation-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Seat Matrix */
+        .seat-matrix-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .seat-matrix-container.active {
+            display: block;
+        }
+
+        .floor-info {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .floor-name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+
+        .floor-stats {
+            color: #b0b0b0;
+            font-size: 1.1rem;
+        }
+
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+            margin: 30px 0;
+        }
+
+        .seat {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            user-select: none;
+            font-size: 0.9rem;
+        }
+
+        .seat-number {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .desk-icon {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .seat:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .seat.occupied {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .seat.reserved {
+            background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+        }
+
+        .seat.available {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        }
+
+        .seat.my-reservation {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            border: 2px solid #ffffff;
+        }
+
+        .seat-timer {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 0.6rem;
+            padding: 2px 4px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .charging-icon {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            color: #feca57;
+            font-size: 0.8rem;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-color.available {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        }
+
+        .legend-color.occupied {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .legend-color.reserved {
+            background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+        }
+
+        .legend-color.my-reservation {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #b0b0b0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .matrix-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .floor-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .floor-btn {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-chair"></i> Seat Matrix
+                </div>
+                <a href="{{ url_for('home') }}" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <h1 class="page-title">Library Seat Matrix</h1>
+            
+            <!-- Floor Selection -->
+            <div class="floor-selection">
+                <div class="floor-title">Select a Floor</div>
+                <div class="floor-buttons">
+                    <button class="floor-btn" data-floor="ground">Ground Floor (50 seats)</button>
+                    <button class="floor-btn" data-floor="floor1">Floor 1 (100 seats)</button>
+                    <button class="floor-btn" data-floor="floor2">Floor 2 (100 seats)</button>
+                    <button class="floor-btn" data-floor="floor3">Floor 3 (100 seats)</button>
+                </div>
+            </div>
+            
+            <!-- User Info -->
+            <div class="user-info">
+                <div class="user-name" id="userName">Welcome, {{ user_info.name }}!</div>
+                <div class="user-instructions">Right-click on available seats to reserve them for 10 minutes</div>
+                <div style="margin-top: 10px; font-size: 0.9rem; color: #b0b0b0;">
+                    Registration Number: {{ user_info.registration_number }}
+                </div>
+                <div id="userReservation" class="user-reservation" style="display: none;">
+                    <div class="reservation-info" id="reservationInfo"></div>
+                    <button class="cancel-reservation-btn" onclick="cancelUserReservation()">Cancel Reservation</button>
+                </div>
+            </div>
+
+            <!-- Seat Matrix Container -->
+            <div id="seatMatrixContainer" class="seat-matrix-container">
+                <div class="floor-info">
+                    <div class="floor-name" id="currentFloorName"></div>
+                    <div class="floor-stats" id="floorStats"></div>
+                </div>
+
+                <!-- Stats -->
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #4ecdc4;" id="availableCount">0</div>
+                        <div class="stat-label">Available Seats</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #ff6b6b;" id="occupiedCount">0</div>
+                        <div class="stat-label">Occupied Seats</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #feca57;" id="reservedCount">0</div>
+                        <div class="stat-label">Reserved Seats</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #00d4ff;" id="totalCount">0</div>
+                        <div class="stat-label">Total Seats</div>
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color available"></div>
+                        <span>Available</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color occupied"></div>
+                        <span>Occupied</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color reserved"></div>
+                        <span>Reserved</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color my-reservation"></div>
+                        <span>My Reservation</span>
+                    </div>
+                    <div class="legend-item">
+                        <i class="fas fa-plug" style="color: #feca57;"></i>
+                        <span>Charging Available</span>
+                    </div>
+                </div>
+
+                <!-- Seat Matrix -->
+                <div class="matrix-grid" id="seatGrid">
+                    <!-- Seats will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentUser = '{{ user_info.name }}';
+        let currentFloor = null;
+        let userReservation = null;
+        let reservations = {{ reservations | tojson | safe }};
+        let floorConfig = {{ floor_config | tojson | safe }};
+
+        // Floor selection
+        document.querySelectorAll('.floor-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const floor = this.dataset.floor;
+                selectFloor(floor);
+            });
+        });
+
+        function selectFloor(floor) {
+            currentFloor = floor;
+            
+            // Update active button
+            document.querySelectorAll('.floor-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-floor="${floor}"]`).classList.add('active');
+            
+            // Show seat matrix
+            document.getElementById('seatMatrixContainer').classList.add('active');
+            
+            // Update floor info
+            document.getElementById('currentFloorName').textContent = floorConfig[floor].name;
+            document.getElementById('totalCount').textContent = floorConfig[floor].total_seats;
+            
+            // Generate seats for this floor
+            generateSeats(floor);
+            
+            // Update stats
+            updateStats();
+        }
+
+        function generateSeats(floor) {
+            const seatGrid = document.getElementById('seatGrid');
+            seatGrid.innerHTML = '';
+            
+            const totalSeats = floorConfig[floor].total_seats;
+            const chargingSeats = floorConfig[floor].charging_seats;
+            
+            for (let i = 1; i <= totalSeats; i++) {
+                const seat = document.createElement('div');
+                seat.className = 'seat';
+                seat.dataset.seatNumber = i;
+                seat.dataset.floor = floor;
+                
+                // Add desk icon
+                const deskIcon = document.createElement('i');
+                deskIcon.className = 'fas fa-desk desk-icon';
+                seat.appendChild(deskIcon);
+                
+                // Add seat number in bottom right
+                const seatNumber = document.createElement('div');
+                seatNumber.className = 'seat-number';
+                seatNumber.textContent = i;
+                seat.appendChild(seatNumber);
+                
+                // Check if seat has charging
+                if (chargingSeats.includes(i)) {
+                    const chargingIcon = document.createElement('i');
+                    chargingIcon.className = 'fas fa-plug charging-icon';
+                    seat.appendChild(chargingIcon);
+                }
+                
+                // Check seat status
+                const seatId = `${floor}_${i}`;
+                if (reservations[seatId]) {
+                    seat.classList.add('reserved');
+                    addTimerToSeat(seat, reservations[seatId].expires_at);
+                    
+                    // Check if it's user's reservation
+                    if (reservations[seatId].user_name === currentUser) {
+                        seat.classList.add('my-reservation');
+                    }
+                } else {
+                    seat.classList.add('available');
+                }
+                
+                // Add event listeners
+                seat.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const seatNumber = this.dataset.seatNumber;
+                    const status = this.classList.contains('occupied') ? 'Occupied' : 
+                                 this.classList.contains('reserved') ? 'Reserved' : 'Available';
+                    
+                    if (this.classList.contains('reserved') && reservations[seatId]) {
+                        const reservation = reservations[seatId];
+                        const expiresAt = new Date(reservation.expires_at);
+                        const timeLeft = Math.max(0, Math.floor((expiresAt - new Date()) / 1000 / 60));
+                        alert(`Seat ${seatNumber} is reserved by ${reservation.user_name}\nExpires in: ${timeLeft} minutes`);
+                    } else {
+                        alert(`Seat ${seatNumber} is ${status}`);
+                    }
+                });
+
+                seat.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    if (this.classList.contains('available')) {
+                        reserveSeat(this.dataset.seatNumber, currentFloor, currentUser);
+                    } else if (this.classList.contains('reserved') && reservations[seatId] && 
+                              reservations[seatId].user_name === currentUser) {
+                        cancelReservation(seatId);
+                    }
+                });
+                
+                seatGrid.appendChild(seat);
+            }
+        }
+
+        function reserveSeat(seatNumber, floor, userName) {
+            fetch('/reserve-seat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    seat_number: seatNumber,
+                    floor: floor,
+                    user_name: userName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateSeatStatus(`${floor}_${seatNumber}`, 'reserved', data.expires_at);
+                    updateStats();
+                    checkUserReservation();
+                    alert(data.message);
+                } else {
+                    if (data.existing_reservation) {
+                        alert(data.message + '\n\n');
+                        // Show user's current reservation
+                        checkUserReservation();
+                    } else {
+                        alert(data.message);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error reserving seat');
+            });
+        }
+
+        function cancelReservation(seatId) {
+            if (!currentUser) return;
+
+            fetch('/cancel-reservation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    seat_id: seatId,
+                    user_name: currentUser
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateSeatStatus(seatId, 'available');
+                    updateStats();
+                    checkUserReservation();
+                    alert(data.message);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error cancelling reservation');
+            });
+        }
+
+        function cancelUserReservation() {
+            if (userReservation) {
+                cancelReservation(userReservation.seat_id);
+            }
+        }
+
+        function updateSeatStatus(seatId, status, expiresAt = null) {
+            const seat = document.querySelector(`[data-seat-number="${seatId.split('_')[1]}"][data-floor="${seatId.split('_')[0]}"]`);
+            if (seat) {
+                seat.className = 'seat';
+                seat.classList.add(status);
+                
+                // Ensure desk icon and seat number are preserved
+                if (!seat.querySelector('.desk-icon')) {
+                    const deskIcon = document.createElement('i');
+                    deskIcon.className = 'fas fa-desk desk-icon';
+                    seat.appendChild(deskIcon);
+                }
+                
+                if (!seat.querySelector('.seat-number')) {
+                    const seatNumber = document.createElement('div');
+                    seatNumber.className = 'seat-number';
+                    seatNumber.textContent = seat.dataset.seatNumber;
+                    seat.appendChild(seatNumber);
+                }
+                
+                if (status === 'reserved' && expiresAt) {
+                    addTimerToSeat(seat, expiresAt);
+                    if (currentUser && reservations[seatId] && reservations[seatId].user_name === currentUser) {
+                        seat.classList.add('my-reservation');
+                    }
+                } else {
+                    const timer = seat.querySelector('.seat-timer');
+                    if (timer) timer.remove();
+                }
+            }
+        }
+
+        function addTimerToSeat(seat, expiresAt) {
+            const timer = document.createElement('div');
+            timer.className = 'seat-timer';
+            seat.appendChild(timer);
+            
+            function updateTimer() {
+                const now = new Date();
+                const expiry = new Date(expiresAt);
+                const timeLeft = Math.max(0, Math.floor((expiry - now) / 1000));
+                
+                if (timeLeft <= 0) {
+                    timer.remove();
+                    seat.className = 'seat available';
+                    const seatId = `${seat.dataset.floor}_${seat.dataset.seatNumber}`;
+                    delete reservations[seatId];
+                    updateStats();
+                    checkUserReservation();
+                    
+                    // Remove my-reservation class if it was user's reservation
+                    seat.classList.remove('my-reservation');
+                } else {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }
+            }
+            
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        }
+
+        function updateStats() {
+            if (!currentFloor) return;
+            
+            let available = 0, occupied = 0, reserved = 0;
+            const totalSeats = floorConfig[currentFloor].total_seats;
+            
+            for (let i = 1; i <= totalSeats; i++) {
+                const seatId = `${currentFloor}_${i}`;
+                if (reservations[seatId]) {
+                    reserved++;
+                } else {
+                    available++;
+                }
+            }
+            
+            document.getElementById('availableCount').textContent = available;
+            document.getElementById('occupiedCount').textContent = occupied;
+            document.getElementById('reservedCount').textContent = reserved;
+        }
+
+        function checkUserReservation() {
+            fetch('/get-user-reservation')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    userReservation = data.reservation;
+                    const reservationDiv = document.getElementById('userReservation');
+                    const reservationInfo = document.getElementById('reservationInfo');
+                    
+                    reservationInfo.textContent = `You have reserved Seat ${userReservation.seat_number} on ${floorConfig[userReservation.floor].name}`;
+                    reservationDiv.style.display = 'block';
+                } else {
+                    userReservation = null;
+                    document.getElementById('userReservation').style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error checking reservation:', error);
+            });
+        }
+
+        // Initial setup
+        checkUserReservation();
+        
+        // Auto-select ground floor
+        selectFloor('ground');
+    </script>
+</body>
+</html>
